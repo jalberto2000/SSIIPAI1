@@ -4,3 +4,4 @@ HashLib
 Socket
 Sys
 Secrets
+os
