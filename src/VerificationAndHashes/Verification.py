@@ -21,4 +21,3 @@ def generadorToken(n_bits = None):
 def calculaMAC(token, hash):
     #SUPONGO QUE EL CHALLENGE ES UNA SUMA HASTA QUE CONTESTE EL PROFESOR 
     return (token + hash)
-    pass
