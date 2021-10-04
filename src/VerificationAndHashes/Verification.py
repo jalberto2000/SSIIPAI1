@@ -16,3 +16,9 @@ def hashearArchivo(archivo, TAMAÑO_BUFFER = 65536):
 #LA FUNCION GENERADORTOKEN ES UN WRAPPER DE LA FUNCION IMPLEMENTADA EN EL MODULE SECRETS
 def generadorToken(n_bits = None):
     return secrets.token_hex(n_bits)
+
+
+def calculaMAC(token, hash):
+    #SUPONGO QUE EL CHALLENGE ES UNA SUMA HASTA QUE CONTESTE EL PROFESOR 
+    return (token + hash)
+    pass
