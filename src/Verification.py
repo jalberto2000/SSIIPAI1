@@ -23,8 +23,8 @@ def generadorToken(n_bits = None):
 
 def calculaMAC(token, hash, fichero):
 
-    llave = str(hash % token)
-    hashmac = hmac.new(llave.encode("ascii"), digestmod= hashlib.sha256)
+    llave = str(hash % token) #CALCULAMOS LA LLAVE PARA EL HMAC QUE SERA EN ESTE CASO UN MODULO ENTRE EL HASH Y EL TOKEN
+    hashmac = hmac.new(llave.encode("ascii"), digestmod= hashlib.sha256) 
     with open(fichero, 'rb') as f:
         while True:
             bloque = f.read(TAMAÑO_BUFFER)
