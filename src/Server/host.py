@@ -1,35 +1,52 @@
 #Prueba Host
 import socket
-import sys
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+import select
 
-# Bind the socket to the port
-server_address = ('localhost', 10000)
-print('starting up on {} port {}'.format(*server_address))
-sock.bind(server_address)
+header = 10
+ip = "127.0.0.1"
+port = 1234
+server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+server_socket.bind((ip,port))
+server_socket.listen()
 
-# Listen for incoming connections
-sock.listen(1)
+sockets_list=[server_socket]
+clients = {} #Esto lo podemos utilizar por si queremos guardar informacion
+
+def receive_message(client_socket):
+    try:
+        message_header = client_socket.recv(header)
+        if not len(message_header):
+            return False
+        message_lenght = int(message_header.decode("utf-8").strip())
+        return {"header":message_header,"data":client_socket.recv(message_lenght)}
+    except:
+        return False
 
 while True:
-    # Wait for a connection
-    print('waiting for a connection')
-    connection, client_address = sock.accept()
-    try:
-        print('connection from', client_address)
-
-        # Receive the data in small chunks and retransmit it
-        while True:
-            data = connection.recv(16)
-            print('received {!r}'.format(data))
-            if data:
-                print('sending data back to the client')
-                connection.sendall(data)
-            else:
-                print('no data from', client_address)
-                break
-
-    finally:
-        # Clean up the connection
-        connection.close()
+    read_sockets, _,exception_sockets= select.select(sockets_list,[],sockets_list)
+    for notified_socket in read_sockets:
+        if notified_socket == server_socket:
+            client_socket,client_address = server_socket.accept()
+            user = receive_message(client_socket)
+            if user is False:
+                continue
+            sockets_list.append(client_socket)
+            clients[client_socket]=user
+            print(f"Accepted new connection from {client_address[0]}:{client_address[1]} username:{user['data'].decode('utf-8')}")
+        else:
+            message = receive_message (notified_socket)
+            if message is False:
+                print(f"Closed connection from {clients[notified_socket]['data'].decode('utf-8')}")
+                sockets_list.remove(notified_socket)
+                del clients[notified_socket]
+                continue
+            user = clients[notified_socket]
+            print(f"Received message from {user['data'].decode('utf-8')} : {message['data'].decode('utf-8')}")
+            for client_socket in clients:
+                if client_socket != notified_socket:
+                    client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
+    
+    for notified_socket in exception_sockets:
+        sockets_list.remove(notified_socket)
+        del clients[notified_socket]

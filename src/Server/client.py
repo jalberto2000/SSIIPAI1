@@ -1,31 +1,49 @@
-#Prueba Cliente
+'''Este codigo sirve para conectar 2 clientes y que se comuniquen entre ellos'''
+'''El siguiente paso es conectar mediante una serie de comandos con el servidor (host)'''
 import socket
+import select
+import errno
 import sys
 
-# Create a TCP/IP socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+header = 10
+ip = "127.0.0.1"
+port = 1234
 
-# Connect the socket to the port where the server is listening
-server_address = ('localhost', 10000)
-print('connecting to {} port {}'.format(*server_address))
-sock.connect(server_address)
+identify = input("Introduzca su usuario: ")
+client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+client_socket.connect((ip,port))
+client_socket.setblocking(False)
 
-try:
+username = identify.encode('utf-8')
+username_header = f"{len(username):<{header}}".encode('utf-8')
+client_socket.send(username_header + username)
 
-    # Send data
-    message = b'This is the message.  It will be repeated.'
-    print('sending {!r}'.format(message))
-    sock.sendall(message)
+while True:
+    message = input(f"{identify} > ")
+    if message:
+        message = message.encode('utf-8')
+        message_header = f"{len(message):<{header}}".encode("utf-8")
+        client_socket.send(message_header + message)
+    try:
+        while True:
+            username_header=client_socket.recv(header)
+            if not len(username_header):
+                print("Connection closed by the server")
+                sys.exit()
 
-    # Look for the response
-    amount_received = 0
-    amount_expected = len(message)
+            username_length = int(username_header.decode("utf-8").strip())
+            username = client_socket.recv(username_length).decode("utf-8")
+            message_header = client_socket.recv(header)
+            message_length = int(message_header.decode("utf-8").strip())
+            message = client_socket.recv(message_length).decode("utf-8")
 
-    while amount_received < amount_expected:
-        data = sock.recv(16)
-        amount_received += len(data)
-        print('received {!r}'.format(data))
+            print(f"{username} > {message}")
+    except IOError as e:
+        if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
+            print('Reading error',str(e))
+            sys.exit()
+        continue
 
-finally:
-    print('closing socket')
-    sock.close()
+    except Exception as e:
+        print('General error', str(e))
+        sys.exit()
