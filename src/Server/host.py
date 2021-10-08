@@ -42,6 +42,12 @@ while True:
                 del clients[notified_socket]
                 continue
             user = clients[notified_socket]
+            if message['data'].decode('utf-8')=="0":
+                print(f"Identificacion")
+            elif message['data'].decode('utf-8')=="1":
+                print("Envio arbol")
+            else:
+                print(f"Received message from {user['data'].decode('utf-8')} : {message['data'].decode('utf-8')}")
             print(f"Received message from {user['data'].decode('utf-8')} : {message['data'].decode('utf-8')}")
             for client_socket in clients:
                 if client_socket != notified_socket:
