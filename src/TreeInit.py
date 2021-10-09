@@ -23,19 +23,3 @@ def creaArbol(direccionArchivo):
     return arbol
 
 
-s = '{"Harry": {"data": null, "children": [{"Bill": {"data": null}}, {"Jane": {"data": null, "children": [{"Diane": {"data": null}}, {"Mark": {"data": null}}]}}, {"Mary": {"data": null}}]}}'
-
-def treeFromJson(a):
-    res = Tree()
-    arbol = json.dumps(a)
-    return arbol
-
-arbol = creaArbol(r"C:\Users\a-l-f\Desktop\carpeta1")
-
-print(creaArbol(r"C:\Users\a-l-f\Desktop\carpeta1"))
-
-print(arbol.contains(r'C:\Users\a-l-f\Desktop\carpeta1'))
-
-print(type(s))
-
-print(type(treeFromJson(s)))
