@@ -13,7 +13,7 @@ def creaArbol(direccionArchivo):
         for name in files:
             direccion = os.path.join(root, name)
             hashArchivo = hashearArchivo(direccion)
-            arbol.create_node(tag = name, identifier=(direccion, hashArchivo), parent = root)
+            arbol.create_node(tag = name, data=(direccion, hashArchivo), parent = root)
             # para identificar los archivos usaremos una tupla (direccion completa, hash)
             # aunque el show solo muestre el nombre 
         for name in dirs:
