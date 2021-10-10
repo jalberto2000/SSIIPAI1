@@ -4,7 +4,7 @@ import select
 
 header = 10
 ip = "127.0.0.1"
-port = 1234
+port = 65432
 server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 server_socket.bind((ip,port))
@@ -42,6 +42,12 @@ while True:
                 del clients[notified_socket]
                 continue
             user = clients[notified_socket]
+            if message['data'].decode('utf-8')=="0":
+                print(f"Identificacion")
+            elif message['data'].decode('utf-8')=="1":
+                print("Envio arbol")
+            else:
+                print(f"Received message from {user['data'].decode('utf-8')} : {message['data'].decode('utf-8')}")
             print(f"Received message from {user['data'].decode('utf-8')} : {message['data'].decode('utf-8')}")
             for client_socket in clients:
                 if client_socket != notified_socket:
