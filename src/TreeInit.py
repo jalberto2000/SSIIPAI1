@@ -39,3 +39,10 @@ print(arbol.contains(r'C:\Users\a-l-f\Desktop\carpeta1'))
 print(type(s))
 
 print(type(treeFromJson(s)))
+
+
+
+creaarbol(diccionario, padre):
+    arbol = diccionario.llave
+    for hijo en hijos]:
+        arbol = añadir creaarbol a arbol
