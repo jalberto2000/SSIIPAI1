@@ -1,8 +1,26 @@
 import socket
-from TreeInit import *
+from TreeInit import *  
 HOST = '127.0.0.1'
-
+FORMATO = "utf-8"
+CERRAR_CONEXION = "close_connection"
+CABECERA = 16
 PORT = 65432
+
+cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+cliente.connect((HOST, PORT))
+
+def enviarMensaje(mensaje):
+    bytesMensaje = mensaje.encode(FORMATO)
+    datos_cabecera = str(len(bytesMensaje)).encode(FORMATO)
+    datos_cabecera += b' ' * (CABECERA - len(datos_cabecera))
+    cliente.send(datos_cabecera)
+    cliente.send(bytesMensaje)
+
+enviarMensaje("Hola")
+enviarMensaje("probando servidor cliente")
+enviarMensaje(CERRAR_CONEXION)
+
+
 
 def registroSistema():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
