@@ -1,12 +1,22 @@
-import socket
-
+import socket, json, treelib
+from Users import *
+from treeFormatter import *
 HOST = "127.0.0.1"
 PORT = 65432
 CABECERA = 16
 FORMATO = "utf-8"
 CERRAR_CONEXION = "close_connection"
+FALLO_VERIFICACION = "123"
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((HOST, PORT))
+
+def enviarMensaje(mensaje, cliente):
+    bytesMensaje = mensaje.encode(FORMATO)
+    datos_cabecera = str(len(bytesMensaje)).encode(FORMATO)
+    datos_cabecera += b' ' * (CABECERA - len(datos_cabecera))
+    cliente.send(datos_cabecera)
+    cliente.send(bytesMensaje)
+
 
 def arrancar_servidor():
     server.listen()
@@ -14,13 +24,44 @@ def arrancar_servidor():
         conn, direccion = server.accept()
         manejar_cliente(conn, direccion)
 
+def maneja_crea_arbol(conn, direccion):
+    mensaje_recibido = conn.recv(CABECERA) 
+    ruta_archivo = "./Users/"+ str(direccion[0]+"/arbol")
+    if mensaje_recibido:
+        datos = conn.recv(int(mensaje_recibido.decode(FORMATO))).decode(FORMATO)
+        
+        with open(file = ruta_archivo, mode = 'w') as f:
+            f.write(datos)
+
+def integridadFicheros(dicc, arbol):
+    res = {}
+    for direccion in dicc.keys():
+        if (arbol.contains((direccion, dicc[direccion][0]))):
+            res[direccion] = calculaMAC(dicc[direccion][1], dicc[direccion][0])
+        else:
+            res[direccion] = FALLO_VERIFICACION
+    return res
+
 def manejar_cliente(conn, direccion):
     print("Nueva conexion con: " + str(direccion))
     while True:
         mensaje_recibido = conn.recv(CABECERA) 
         if mensaje_recibido:
             datos = conn.recv(int(mensaje_recibido.decode(FORMATO))).decode(FORMATO)
-            print(datos)
+            if datos == "1":
+                creaUsuario(direccion[0])
+            elif datos == "2":
+                maneja_crea_arbol(conn, direccion)
+            elif datos == "3":
+                arbol = None
+                msj = conn.recv(CABECERA)
+                datos_arbol = conn.recv(int(msj.decode(FORMATO))).decode(FORMATO)
+                dicc = json.loads(datos_arbol)
+                with open("./Users/"+str(direccion[0]) + "/arbol", 'r') as f:
+                    arbol = treeFromDict(json.loads(f.read()))
+                res = integridadFicheros(dicc, arbol)
+                enviarMensaje(json.dumps(res), conn)
+                
             if datos == CERRAR_CONEXION:
                 break
     
@@ -30,38 +71,3 @@ def manejar_cliente(conn, direccion):
 
 
 arrancar_servidor()
-"""
-def __main__():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen()
-        while True:
-            conn, addr = s.accept()
-
-            with conn:
-                print('Conectado con: ', addr)
-                
-                datos = conn.recv(4096)
-                if not datos:
-                    break
-                if datos == 0:
-                    #TODO FUNCION QUE REGISTRA AL USUARIO
-                    conn.sendall(b'El registro se ha realizado correctamente\n')
-                    
-                if datos == 1:
-                    #TODO FUNCION QUE GUARDA EL ARBOL DEL USUARIO EN SU CARPETA
-                    conn.sendall(b'El sistema esta listo para guardar los archivos\n')
-
-                if datos == 2:
-                    '''
-                    TODO FUNCION QUE RECIBE EL HASH, EL ARCHIVO Y EL TOKEN, CALCULA EL MAC
-                    Y DEVUELVE SI EL HASH COINCIDE
-                    '''
-                    conn.sendall(b'Iniciando comprobacion de archivos')
-
-    
-
-__main__()
-
-
-"""

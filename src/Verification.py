@@ -21,17 +21,11 @@ def generadorToken(n_bits = None):
     return int(secrets.token_hex(n_bits), 16)
 
 
-def calculaMAC(token, hash, fichero):
+def calculaMAC(token, hash):
 
     llave = str(hash % token) #CALCULAMOS LA LLAVE PARA EL HMAC QUE SERA EN ESTE CASO UN MODULO ENTRE EL HASH Y EL TOKEN
-    hashmac = hmac.new(llave.encode("ascii"), digestmod= hashlib.sha256) 
-    with open(fichero, 'rb') as f:
-        while True:
-            bloque = f.read(TAMAÑO_BUFFER)
-            if not bloque:
-                break
-            hashmac.update(bloque)
 
-    return hashmac.hexdigest()
+
+    return llave
 
 
