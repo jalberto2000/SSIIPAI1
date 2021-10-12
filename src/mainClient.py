@@ -90,7 +90,7 @@ def __main__():
                 print("Comprobacion de archivos activada cada 24 horas\n")
                 
                 def verificarIntegridad(sc, ruta):
-                    sc.enter(30, 1, verificarIntegridad, (sc, ruta))
+                    sc.enter(86400, 1, verificarIntegridad, (sc, ruta))
                     compruebaArchivos(ruta)
                     print("Analisis completo")
             s = sched.scheduler(time.time, time.sleep)
