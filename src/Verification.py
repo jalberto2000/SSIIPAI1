@@ -1,5 +1,4 @@
 import hashlib
-import hmac
 import secrets
 
 TAMAÑO_BUFFER = 65536

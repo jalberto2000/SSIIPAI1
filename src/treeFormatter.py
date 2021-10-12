@@ -1,10 +1,12 @@
 from treelib import Tree, Node
+
+#DEVOLVER UN TIPO ARBOL A PARTIR DE UN DICCIONARIO
 def treeFromDict(dicc):
     raiz = next(iter(dicc))
     res = Tree()
     print(dicc[raiz]['data'])
-    if dicc[raiz]['data']:
-        res.create_node(tag = raiz, identifier = tuple(dicc[raiz]['data']))
+    if dicc[raiz]['data']: #SI EL ELEMENTO QUE TRATAMOS ES UN FICHERO NECESITAMOS INCLUIR EL VALOR QUE TENGA DATA
+        res.create_node(tag = raiz, identifier = tuple(dicc[raiz]['data']))  
     else:
         res.create_node(tag = raiz, identifier = raiz)
     if('children' in dicc[raiz]):
@@ -12,6 +14,3 @@ def treeFromDict(dicc):
             subarbol = treeFromDict(hijo)
             res.paste(raiz, subarbol)
     return res
-
-def tupleFromStr(st):
-    return tuple(st[1 : len(st) -1].split(', '))

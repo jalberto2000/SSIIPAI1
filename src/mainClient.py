@@ -1,7 +1,7 @@
 import sched, time, socket, json
 from TreeInit import *
 from Users import *
-from treeFormatter import treeFromDict
+from treeFormatter import *
 
 HOST = '127.0.0.1'
 FORMATO = "utf-8"
@@ -10,11 +10,11 @@ CERRAR_CONEXION = "close_connection"
 PORT = 65432
 FALLO_VERIFICACION = "123"
 
+
 def registroSistema():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
         enviarMensaje("1", s)
-        enviarMensaje("PRUEBA DE REGISTRO", s)
         enviarMensaje(CERRAR_CONEXION, s)
         s.close()
 
@@ -26,6 +26,7 @@ def generarYEnviarArbol(directorio):
         enviarMensaje(CERRAR_CONEXION, s)
         s.close()
 
+#FUNCION QUE IMPLEMENTA EL PROTOCOLO DE PROOF OF POSSESSION
 def compruebaArchivos(directorio):
     dicc = {}
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -40,19 +41,19 @@ def compruebaArchivos(directorio):
 
         enviarMensaje(json.dumps(dicc), s)
         mensaje_recibido = s.recv(CABECERA)
-        datos = s.recv(int(mensaje_recibido.decode(FORMATO))).decode(FORMATO)
-        #TODO CREAR FUNCION QUE RECIBA EL DICCIONARIO Y COMPRUEBE EL MAC DE LOS ARCHIVOS
+        datos = s.recv(int(mensaje_recibido.decode(FORMATO))).decode(FORMATO) #RECIBIMOS LOS MACS QUE HA CALCULADO EL SERVIDOR
         diccServidor = json.loads(datos)
         compruebaMACS(diccServidor, dicc)
         enviarMensaje(CERRAR_CONEXION, s)
 
-
+#VERIFICAMOS LOS MACS QUE ENVIA EL SERVIDOR CON LOS QUE NOSOTROS HEMOS CALCULADO
 def compruebaMACS(diccServidor, diccCliente):
     ip = socket.gethostbyname(HOST)
     creaLog(ip)
     for archivo in diccServidor.keys():
         insertaLog(diccServidor[archivo] == calculaMAC(diccCliente[archivo][1], diccCliente[archivo][0]), ip, archivo)
 
+#PROTOCOLO DE ENVIO DE DATOS AL SERVIDOR, PRIMERO SE INDICA EL NUMERO DE BYTES Y LUEGO SE MANDA EL MENSAJE COMO TAL
 def enviarMensaje(mensaje, cliente):
     bytesMensaje = mensaje.encode(FORMATO)
     datos_cabecera = str(len(bytesMensaje)).encode(FORMATO)

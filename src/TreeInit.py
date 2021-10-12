@@ -1,5 +1,5 @@
-from treelib import Tree, Node
-import os, json
+from treelib import Tree
+import os
 from Verification import *
 
 def creaArbol(direccionArchivo):
@@ -15,7 +15,6 @@ def creaArbol(direccionArchivo):
             hashArchivo = hashearArchivo(direccion)
             arbol.create_node(tag = direccion, data=(direccion, hashArchivo), parent = root)
             # para identificar los archivos usaremos una tupla (direccion completa, hash)
-            # aunque el show solo muestre el nombre 
         for name in dirs:
             direccion = os.path.join(root, name)
             arbol.create_node(tag = direccion, identifier=direccion, parent = root)
