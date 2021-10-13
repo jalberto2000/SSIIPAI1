@@ -4,7 +4,6 @@ from treelib import Tree, Node
 def treeFromDict(dicc):
     raiz = next(iter(dicc))
     res = Tree()
-    print(dicc[raiz]['data'])
     if dicc[raiz]['data']: #SI EL ELEMENTO QUE TRATAMOS ES UN FICHERO NECESITAMOS INCLUIR EL VALOR QUE TENGA DATA
         res.create_node(tag = raiz, identifier = tuple(dicc[raiz]['data']))  
     else:

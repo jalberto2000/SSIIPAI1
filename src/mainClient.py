@@ -5,7 +5,7 @@ from treeFormatter import *
 
 HOST = '127.0.0.1'
 FORMATO = "utf-8"
-CABECERA = 16
+CABECERA = 128
 CERRAR_CONEXION = "close_connection"
 PORT = 65432
 FALLO_VERIFICACION = "123"
@@ -19,10 +19,14 @@ def registroSistema():
         s.close()
 
 def generarYEnviarArbol(directorio):
+    arbol = json.dumps(creaArbol(directorio).to_dict(with_data= True))
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((HOST, PORT))
         enviarMensaje("2", s)
-        enviarMensaje(json.dumps(creaArbol(directorio).to_dict(with_data= True)), s)
+        enviarMensaje(arbol, s)
+        longitud = s.recv(CABECERA)
+        confirmacion = s.recv(int(longitud.decode(FORMATO))).decode(FORMATO)
+        print(confirmacion)
         enviarMensaje(CERRAR_CONEXION, s)
         s.close()
 
@@ -41,6 +45,7 @@ def compruebaArchivos(directorio):
 
         enviarMensaje(json.dumps(dicc), s)
         mensaje_recibido = s.recv(CABECERA)
+        print("longitud del mensaje" + str(int(mensaje_recibido.decode(FORMATO))))
         datos = s.recv(int(mensaje_recibido.decode(FORMATO))).decode(FORMATO) #RECIBIMOS LOS MACS QUE HA CALCULADO EL SERVIDOR
         diccServidor = json.loads(datos)
         compruebaMACS(diccServidor, dicc)
@@ -93,10 +98,10 @@ def __main__():
                     sc.enter(86400, 1, verificarIntegridad, (sc, ruta))
                     compruebaArchivos(ruta)
                     print("Analisis completo")
-            s = sched.scheduler(time.time, time.sleep)
+                s = sched.scheduler(time.time, time.sleep)
 
-            s.enter(2, 1, verificarIntegridad, (s, ruta))
-            s.run()
+                s.enter(2, 1, verificarIntegridad, (s, ruta))
+                s.run()
 
         
         else:

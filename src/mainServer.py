@@ -3,7 +3,7 @@ from Users import *
 from treeFormatter import *
 HOST = "127.0.0.1"
 PORT = 65432
-CABECERA = 16
+CABECERA = 128
 FORMATO = "utf-8"
 CERRAR_CONEXION = "close_connection"
 FALLO_VERIFICACION = "123"
@@ -30,9 +30,10 @@ def maneja_crea_arbol(conn, direccion):
     ruta_archivo = "./Users/"+ str(direccion[0]+"/arbol")
     if mensaje_recibido:
         datos = conn.recv(int(mensaje_recibido.decode(FORMATO))).decode(FORMATO)
-        
         with open(file = ruta_archivo, mode = 'w') as f:
             f.write(datos)
+            f.close()
+    enviarMensaje('Ficheros recibidos correctamente', conn)
 
 #COMPROBAMOS LA INTEGRIDAD DE LOS FICHEROS A PARTIR DE LOS DATOS QUE HAY EN EL SERVIDOR Y LOS QUE NOS MANDA EL CLIENTE
 def integridadFicheros(dicc, arbol):
@@ -48,8 +49,10 @@ def integridadFicheros(dicc, arbol):
 def manejar_cliente(conn, direccion):
     print("Nueva conexion con: " + str(direccion))
     while True:
+        print("ESPERANDO RECIBIR MENSAJE")
         mensaje_recibido = conn.recv(CABECERA) 
         if mensaje_recibido:
+            print(mensaje_recibido.decode(FORMATO))
             datos = conn.recv(int(mensaje_recibido.decode(FORMATO))).decode(FORMATO)
             if datos == "1":
                 creaUsuario(direccion[0])
@@ -58,19 +61,21 @@ def manejar_cliente(conn, direccion):
             elif datos == "3":
                 arbol = None
                 msj = conn.recv(CABECERA)
+                print(msj.decode(FORMATO))
                 datos_arbol = conn.recv(int(msj.decode(FORMATO))).decode(FORMATO)
                 dicc = json.loads(datos_arbol)
                 with open("./Users/"+str(direccion[0]) + "/arbol", 'r') as f:
                     arbol = treeFromDict(json.loads(f.read()))
+                    f.close()
                 res = integridadFicheros(dicc, arbol)
-                enviarMensaje(json.dumps(res), conn)
+                st = json.dumps(res)
+                enviarMensaje(st, conn)
                 
-            if datos == CERRAR_CONEXION:
+            elif datos == CERRAR_CONEXION:
                 break
     
     conn.close()
 
-    pass
 
 
 arrancar_servidor()
